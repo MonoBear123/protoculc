@@ -1,0 +1,8 @@
+version: "3"
+tasks:
+  generate:
+      - gen
+  desc:  "Gen proto cod"
+  cmds:
+      protoc -I protoc protoc/culc/culc.proto --go_out=./protoc/gen/go --go_opt=paths=source_relative --go-grpc_out=./protoc/gen/go --go-grpc_opt=paths=source_relative
+      
