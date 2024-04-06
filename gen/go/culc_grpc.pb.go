@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v5.26.1
-// source: culc/culc.proto
+// source: culc.proto
 
 package culc
 
@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type AuthClient interface {
 	Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*RegisterRes, error)
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginRes, error)
+	Calculate(ctx context.Context, in *CalculateReq, opts ...grpc.CallOption) (*CalculateRes, error)
 }
 
 type authClient struct {
@@ -52,12 +53,22 @@ func (c *authClient) Login(ctx context.Context, in *LoginReq, opts ...grpc.CallO
 	return out, nil
 }
 
+func (c *authClient) Calculate(ctx context.Context, in *CalculateReq, opts ...grpc.CallOption) (*CalculateRes, error) {
+	out := new(CalculateRes)
+	err := c.cc.Invoke(ctx, "/auth.Auth/Calculate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility
 type AuthServer interface {
 	Register(context.Context, *RegisterReq) (*RegisterRes, error)
 	Login(context.Context, *LoginReq) (*LoginRes, error)
+	Calculate(context.Context, *CalculateReq) (*CalculateRes, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedAuthServer) Register(context.Context, *RegisterReq) (*Registe
 }
 func (UnimplementedAuthServer) Login(context.Context, *LoginReq) (*LoginRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAuthServer) Calculate(context.Context, *CalculateReq) (*CalculateRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Calculate not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 
@@ -120,6 +134,24 @@ func _Auth_Login_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_Calculate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CalculateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).Calculate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.Auth/Calculate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).Calculate(ctx, req.(*CalculateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -135,93 +167,11 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Login",
 			Handler:    _Auth_Login_Handler,
 		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "culc/culc.proto",
-}
-
-// CulcClient is the client API for Culc service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CulcClient interface {
-	Send(ctx context.Context, in *SendReq, opts ...grpc.CallOption) (*SendRes, error)
-}
-
-type culcClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewCulcClient(cc grpc.ClientConnInterface) CulcClient {
-	return &culcClient{cc}
-}
-
-func (c *culcClient) Send(ctx context.Context, in *SendReq, opts ...grpc.CallOption) (*SendRes, error) {
-	out := new(SendRes)
-	err := c.cc.Invoke(ctx, "/auth.Culc/Send", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// CulcServer is the server API for Culc service.
-// All implementations must embed UnimplementedCulcServer
-// for forward compatibility
-type CulcServer interface {
-	Send(context.Context, *SendReq) (*SendRes, error)
-	mustEmbedUnimplementedCulcServer()
-}
-
-// UnimplementedCulcServer must be embedded to have forward compatible implementations.
-type UnimplementedCulcServer struct {
-}
-
-func (UnimplementedCulcServer) Send(context.Context, *SendReq) (*SendRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
-}
-func (UnimplementedCulcServer) mustEmbedUnimplementedCulcServer() {}
-
-// UnsafeCulcServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CulcServer will
-// result in compilation errors.
-type UnsafeCulcServer interface {
-	mustEmbedUnimplementedCulcServer()
-}
-
-func RegisterCulcServer(s grpc.ServiceRegistrar, srv CulcServer) {
-	s.RegisterService(&Culc_ServiceDesc, srv)
-}
-
-func _Culc_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CulcServer).Send(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/auth.Culc/Send",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CulcServer).Send(ctx, req.(*SendReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Culc_ServiceDesc is the grpc.ServiceDesc for Culc service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Culc_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "auth.Culc",
-	HandlerType: (*CulcServer)(nil),
-	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Send",
-			Handler:    _Culc_Send_Handler,
+			MethodName: "Calculate",
+			Handler:    _Auth_Calculate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "culc/culc.proto",
+	Metadata: "culc.proto",
 }

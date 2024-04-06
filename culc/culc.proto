@@ -5,17 +5,15 @@ option go_package = "github.com/MonoBear123/protoculc/protoc/culc";
 service Auth {
     rpc Register(RegisterReq) returns (RegisterRes);
     rpc Login(LoginReq) returns (LoginRes);
+    rpc Calculate(CalculateReq) returns (CalculateRes);
 }
-service Culc {
-    rpc Send(SendReq) returns (SendRes);
 
-}
-message SendReq {
+message CalculateReq {
     string expression = 1;
-
 }
-message SendRes {
-    string res = 1;
+
+message CalculateRes {
+    string result = 1;
 }
 message RegisterReq {
     string email = 1;
