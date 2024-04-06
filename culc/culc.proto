@@ -6,12 +6,20 @@ service Auth {
     rpc Register(RegisterReq) returns (RegisterRes);
     rpc Login(LoginReq) returns (LoginRes);
     rpc Calculate(CalculateReq) returns (CalculateRes);
+    rpc Broker(BrokerReq) returns (BrokerRes);
 }
 
 message CalculateReq {
     string expression = 1;
 }
-
+message BrokerReq {
+    string num1 =1 ;
+    string operator =2;
+    string num2 = 3;
+}
+message BrokerRes {
+    string res =1;
+}
 message CalculateRes {
     string result = 1;
 }
