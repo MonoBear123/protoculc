@@ -24,18 +24,21 @@ service Auth {
             body: "*"
         };
     }
-    rpc Broker(BrokerReq) returns (BrokerRes);
-}
+    rpc NewClient(ClientReq) returns (ClientRes){
+        option (google.api.http) = {
+            post: "/newclient"
+            body: "*"
+        };
+}}
 
 message CalculateReq {
     string expression = 1;
 }
-message BrokerReq {
-    string num1 = 1 ;
-    string oper = 2;
-    string num2 = 3;
+message ClientReq {
+    int32 countworker = 1;
+
 }
-message BrokerRes {
+message ClientRes {
     string res = 1;
 }
 message CalculateRes {
@@ -51,7 +54,7 @@ message RegisterRes {
 message LoginReq {
     string email = 1;
     string password = 2;
-    int32 app_id = 3;
+    
 }
 message LoginRes {
     string token = 1;

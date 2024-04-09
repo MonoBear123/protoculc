@@ -25,7 +25,7 @@ type AuthClient interface {
 	Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*RegisterRes, error)
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginRes, error)
 	Calculate(ctx context.Context, in *CalculateReq, opts ...grpc.CallOption) (*CalculateRes, error)
-	Broker(ctx context.Context, in *BrokerReq, opts ...grpc.CallOption) (*BrokerRes, error)
+	NewClient(ctx context.Context, in *ClientReq, opts ...grpc.CallOption) (*ClientRes, error)
 }
 
 type authClient struct {
@@ -63,9 +63,9 @@ func (c *authClient) Calculate(ctx context.Context, in *CalculateReq, opts ...gr
 	return out, nil
 }
 
-func (c *authClient) Broker(ctx context.Context, in *BrokerReq, opts ...grpc.CallOption) (*BrokerRes, error) {
-	out := new(BrokerRes)
-	err := c.cc.Invoke(ctx, "/auth.Auth/Broker", in, out, opts...)
+func (c *authClient) NewClient(ctx context.Context, in *ClientReq, opts ...grpc.CallOption) (*ClientRes, error) {
+	out := new(ClientRes)
+	err := c.cc.Invoke(ctx, "/auth.Auth/NewClient", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ type AuthServer interface {
 	Register(context.Context, *RegisterReq) (*RegisterRes, error)
 	Login(context.Context, *LoginReq) (*LoginRes, error)
 	Calculate(context.Context, *CalculateReq) (*CalculateRes, error)
-	Broker(context.Context, *BrokerReq) (*BrokerRes, error)
+	NewClient(context.Context, *ClientReq) (*ClientRes, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -96,8 +96,8 @@ func (UnimplementedAuthServer) Login(context.Context, *LoginReq) (*LoginRes, err
 func (UnimplementedAuthServer) Calculate(context.Context, *CalculateReq) (*CalculateRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Calculate not implemented")
 }
-func (UnimplementedAuthServer) Broker(context.Context, *BrokerReq) (*BrokerRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Broker not implemented")
+func (UnimplementedAuthServer) NewClient(context.Context, *ClientReq) (*ClientRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewClient not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 
@@ -166,20 +166,20 @@ func _Auth_Calculate_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Auth_Broker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BrokerReq)
+func _Auth_NewClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClientReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServer).Broker(ctx, in)
+		return srv.(AuthServer).NewClient(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/auth.Auth/Broker",
+		FullMethod: "/auth.Auth/NewClient",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).Broker(ctx, req.(*BrokerReq))
+		return srv.(AuthServer).NewClient(ctx, req.(*ClientReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -204,8 +204,8 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Auth_Calculate_Handler,
 		},
 		{
-			MethodName: "Broker",
-			Handler:    _Auth_Broker_Handler,
+			MethodName: "NewClient",
+			Handler:    _Auth_NewClient_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
