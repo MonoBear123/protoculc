@@ -1,6 +1,8 @@
+
 version: "3"
 tasks:
-  generate:
+  
+  gplagin:
     aliases:
       - gen
     desc: "Generate protobuf code"
