@@ -167,6 +167,31 @@ func local_request_Auth_NewClient_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
+func request_Auth_StreamServerStatuses_0(ctx context.Context, marshaler runtime.Marshaler, client AuthClient, req *http.Request, pathParams map[string]string) (Auth_StreamServerStatusesClient, runtime.ServerMetadata, error) {
+	var protoReq StreamServerStatusesRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	stream, err := client.StreamServerStatuses(ctx, &protoReq)
+	if err != nil {
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
+
+}
+
 // RegisterAuthHandlerServer registers the http handlers for service Auth to "mux".
 // UnaryRPC     :call AuthServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -271,6 +296,13 @@ func RegisterAuthHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 
 		forward_Auth_NewClient_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
+	})
+
+	mux.Handle("POST", pattern_Auth_StreamServerStatuses_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
 	})
 
 	return nil
@@ -402,6 +434,28 @@ func RegisterAuthHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 
 	})
 
+	mux.Handle("POST", pattern_Auth_StreamServerStatuses_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/auth.Auth/StreamServerStatuses", runtime.WithHTTPPathPattern("/allclient"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Auth_StreamServerStatuses_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Auth_StreamServerStatuses_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -413,6 +467,8 @@ var (
 	pattern_Auth_Calculate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"culc"}, ""))
 
 	pattern_Auth_NewClient_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"newclient"}, ""))
+
+	pattern_Auth_StreamServerStatuses_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"allclient"}, ""))
 )
 
 var (
@@ -423,4 +479,6 @@ var (
 	forward_Auth_Calculate_0 = runtime.ForwardResponseMessage
 
 	forward_Auth_NewClient_0 = runtime.ForwardResponseMessage
+
+	forward_Auth_StreamServerStatuses_0 = runtime.ForwardResponseStream
 )

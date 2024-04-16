@@ -29,8 +29,25 @@ service Auth {
             post: "/newclient"
             body: "*"
         };
-}}
-
+    }
+    rpc StreamServerStatuses(StreamServerStatusesRequest) returns (stream StreamServerStatusesResponse) {
+        option (google.api.http) = {
+            post: "/allclient"
+            body: "*"
+        };
+    }
+}
+message StreamServerStatusesRequest {
+    
+}
+message StreamServerStatusesResponse {
+    repeated ServerStatus statuses = 1;
+}
+message ServerStatus {
+    string server_id = 1; 
+    int32 active = 2;  
+    int32 all = 3;  
+}
 message CalculateReq {
     string expression = 1;
 }
