@@ -36,6 +36,29 @@ service Auth {
             body: "*"
         };
     }
+    rpc GetHistoryEx(HistoryReq) returns (HistoryRes){
+        option (google.api.http) = {
+            post: "/history"
+            body: "*"
+        };
+    }
+
+}
+
+message HistoryReq {
+    
+}
+
+// Определение сообщения для ответа с историей выражений
+message HistoryRes {
+    repeated Expression expressions = 1; // Список выражений
+}
+
+// Определение сообщения для выражения
+message Expression {
+    int32 id = 1; // Идентификатор выражения
+    string expres = 2;  // Идентификатор пользователя
+
 }
 message StreamServerStatusesRequest {
     

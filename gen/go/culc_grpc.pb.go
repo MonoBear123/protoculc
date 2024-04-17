@@ -27,6 +27,7 @@ type AuthClient interface {
 	Calculate(ctx context.Context, in *CalculateReq, opts ...grpc.CallOption) (*CalculateRes, error)
 	NewClient(ctx context.Context, in *ClientReq, opts ...grpc.CallOption) (*ClientRes, error)
 	StreamServerStatuses(ctx context.Context, in *StreamServerStatusesRequest, opts ...grpc.CallOption) (Auth_StreamServerStatusesClient, error)
+	GetHistoryEx(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*HistoryRes, error)
 }
 
 type authClient struct {
@@ -105,6 +106,15 @@ func (x *authStreamServerStatusesClient) Recv() (*StreamServerStatusesResponse, 
 	return m, nil
 }
 
+func (c *authClient) GetHistoryEx(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*HistoryRes, error) {
+	out := new(HistoryRes)
+	err := c.cc.Invoke(ctx, "/auth.Auth/GetHistoryEx", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility
@@ -114,6 +124,7 @@ type AuthServer interface {
 	Calculate(context.Context, *CalculateReq) (*CalculateRes, error)
 	NewClient(context.Context, *ClientReq) (*ClientRes, error)
 	StreamServerStatuses(*StreamServerStatusesRequest, Auth_StreamServerStatusesServer) error
+	GetHistoryEx(context.Context, *HistoryReq) (*HistoryRes, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -135,6 +146,9 @@ func (UnimplementedAuthServer) NewClient(context.Context, *ClientReq) (*ClientRe
 }
 func (UnimplementedAuthServer) StreamServerStatuses(*StreamServerStatusesRequest, Auth_StreamServerStatusesServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamServerStatuses not implemented")
+}
+func (UnimplementedAuthServer) GetHistoryEx(context.Context, *HistoryReq) (*HistoryRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryEx not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 
@@ -242,6 +256,24 @@ func (x *authStreamServerStatusesServer) Send(m *StreamServerStatusesResponse) e
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Auth_GetHistoryEx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GetHistoryEx(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.Auth/GetHistoryEx",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GetHistoryEx(ctx, req.(*HistoryReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -264,6 +296,10 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NewClient",
 			Handler:    _Auth_NewClient_Handler,
+		},
+		{
+			MethodName: "GetHistoryEx",
+			Handler:    _Auth_GetHistoryEx_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
