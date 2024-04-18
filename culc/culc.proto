@@ -32,14 +32,14 @@ service Auth {
     }
     rpc StreamServerStatuses(StreamServerStatusesRequest) returns (stream StreamServerStatusesResponse) {
         option (google.api.http) = {
-            post: "/allclient"
-            body: "*"
+            get: "/allclient"
+            
         };
     }
     rpc GetHistoryEx(HistoryReq) returns (HistoryRes){
         option (google.api.http) = {
-            post: "/history"
-            body: "*"
+            get: "/history"
+            
         };
     }
 
