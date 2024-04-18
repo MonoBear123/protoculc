@@ -30,7 +30,7 @@ service Auth {
             body: "*"
         };
     }
-    rpc StreamServerStatuses(StreamServerStatusesRequest) returns (stream StreamServerStatusesResponse) {
+    rpc StreamServerStatuses(StreamServerStatusesRequest) returns ( StreamServerStatusesResponse) {
         option (google.api.http) = {
             get: "/allclient"
             

@@ -135,20 +135,21 @@ func local_request_Auth_NewClient_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
-func request_Auth_StreamServerStatuses_0(ctx context.Context, marshaler runtime.Marshaler, client AuthClient, req *http.Request, pathParams map[string]string) (Auth_StreamServerStatusesClient, runtime.ServerMetadata, error) {
+func request_Auth_StreamServerStatuses_0(ctx context.Context, marshaler runtime.Marshaler, client AuthClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq StreamServerStatusesRequest
 	var metadata runtime.ServerMetadata
 
-	stream, err := client.StreamServerStatuses(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
+	msg, err := client.StreamServerStatuses(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Auth_StreamServerStatuses_0(ctx context.Context, marshaler runtime.Marshaler, server AuthServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq StreamServerStatusesRequest
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.StreamServerStatuses(ctx, &protoReq)
+	return msg, metadata, err
 
 }
 
@@ -277,10 +278,28 @@ func RegisterAuthHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 	})
 
 	mux.Handle("GET", pattern_Auth_StreamServerStatuses_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.Auth/StreamServerStatuses", runtime.WithHTTPPathPattern("/allclient"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Auth_StreamServerStatuses_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Auth_StreamServerStatuses_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("GET", pattern_Auth_GetHistoryEx_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -455,7 +474,7 @@ func RegisterAuthHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 			return
 		}
 
-		forward_Auth_StreamServerStatuses_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_Auth_StreamServerStatuses_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -507,7 +526,7 @@ var (
 
 	forward_Auth_NewClient_0 = runtime.ForwardResponseMessage
 
-	forward_Auth_StreamServerStatuses_0 = runtime.ForwardResponseStream
+	forward_Auth_StreamServerStatuses_0 = runtime.ForwardResponseMessage
 
 	forward_Auth_GetHistoryEx_0 = runtime.ForwardResponseMessage
 )

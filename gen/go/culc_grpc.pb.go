@@ -35,7 +35,7 @@ type AuthClient interface {
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginRes, error)
 	Calculate(ctx context.Context, in *CalculateReq, opts ...grpc.CallOption) (*CalculateRes, error)
 	NewClient(ctx context.Context, in *ClientReq, opts ...grpc.CallOption) (*ClientRes, error)
-	StreamServerStatuses(ctx context.Context, in *StreamServerStatusesRequest, opts ...grpc.CallOption) (Auth_StreamServerStatusesClient, error)
+	StreamServerStatuses(ctx context.Context, in *StreamServerStatusesRequest, opts ...grpc.CallOption) (*StreamServerStatusesResponse, error)
 	GetHistoryEx(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*HistoryRes, error)
 }
 
@@ -83,36 +83,13 @@ func (c *authClient) NewClient(ctx context.Context, in *ClientReq, opts ...grpc.
 	return out, nil
 }
 
-func (c *authClient) StreamServerStatuses(ctx context.Context, in *StreamServerStatusesRequest, opts ...grpc.CallOption) (Auth_StreamServerStatusesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Auth_ServiceDesc.Streams[0], Auth_StreamServerStatuses_FullMethodName, opts...)
+func (c *authClient) StreamServerStatuses(ctx context.Context, in *StreamServerStatusesRequest, opts ...grpc.CallOption) (*StreamServerStatusesResponse, error) {
+	out := new(StreamServerStatusesResponse)
+	err := c.cc.Invoke(ctx, Auth_StreamServerStatuses_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &authStreamServerStatusesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Auth_StreamServerStatusesClient interface {
-	Recv() (*StreamServerStatusesResponse, error)
-	grpc.ClientStream
-}
-
-type authStreamServerStatusesClient struct {
-	grpc.ClientStream
-}
-
-func (x *authStreamServerStatusesClient) Recv() (*StreamServerStatusesResponse, error) {
-	m := new(StreamServerStatusesResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *authClient) GetHistoryEx(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*HistoryRes, error) {
@@ -132,7 +109,7 @@ type AuthServer interface {
 	Login(context.Context, *LoginReq) (*LoginRes, error)
 	Calculate(context.Context, *CalculateReq) (*CalculateRes, error)
 	NewClient(context.Context, *ClientReq) (*ClientRes, error)
-	StreamServerStatuses(*StreamServerStatusesRequest, Auth_StreamServerStatusesServer) error
+	StreamServerStatuses(context.Context, *StreamServerStatusesRequest) (*StreamServerStatusesResponse, error)
 	GetHistoryEx(context.Context, *HistoryReq) (*HistoryRes, error)
 	mustEmbedUnimplementedAuthServer()
 }
@@ -153,8 +130,8 @@ func (UnimplementedAuthServer) Calculate(context.Context, *CalculateReq) (*Calcu
 func (UnimplementedAuthServer) NewClient(context.Context, *ClientReq) (*ClientRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewClient not implemented")
 }
-func (UnimplementedAuthServer) StreamServerStatuses(*StreamServerStatusesRequest, Auth_StreamServerStatusesServer) error {
-	return status.Errorf(codes.Unimplemented, "method StreamServerStatuses not implemented")
+func (UnimplementedAuthServer) StreamServerStatuses(context.Context, *StreamServerStatusesRequest) (*StreamServerStatusesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StreamServerStatuses not implemented")
 }
 func (UnimplementedAuthServer) GetHistoryEx(context.Context, *HistoryReq) (*HistoryRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryEx not implemented")
@@ -244,25 +221,22 @@ func _Auth_NewClient_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Auth_StreamServerStatuses_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(StreamServerStatusesRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _Auth_StreamServerStatuses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StreamServerStatusesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(AuthServer).StreamServerStatuses(m, &authStreamServerStatusesServer{stream})
-}
-
-type Auth_StreamServerStatusesServer interface {
-	Send(*StreamServerStatusesResponse) error
-	grpc.ServerStream
-}
-
-type authStreamServerStatusesServer struct {
-	grpc.ServerStream
-}
-
-func (x *authStreamServerStatusesServer) Send(m *StreamServerStatusesResponse) error {
-	return x.ServerStream.SendMsg(m)
+	if interceptor == nil {
+		return srv.(AuthServer).StreamServerStatuses(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_StreamServerStatuses_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).StreamServerStatuses(ctx, req.(*StreamServerStatusesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Auth_GetHistoryEx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -307,16 +281,14 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Auth_NewClient_Handler,
 		},
 		{
+			MethodName: "StreamServerStatuses",
+			Handler:    _Auth_StreamServerStatuses_Handler,
+		},
+		{
 			MethodName: "GetHistoryEx",
 			Handler:    _Auth_GetHistoryEx_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "StreamServerStatuses",
-			Handler:       _Auth_StreamServerStatuses_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "culc.proto",
 }
