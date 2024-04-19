@@ -42,9 +42,24 @@ service Auth {
             
         };
     }
+    rpc UpdateConfig (ConfigReq) returns (ConfigRes){
+        option (google.api.http) = {
+            post: "/config"
+            body: "*"
+        };
+    }
 
 }
-
+message ConfigReq {
+    int64 Plus =1;
+    int64 Minus = 2;
+    int64 MultP = 3;
+    int64 Div = 4;
+    int64 Exponent =5;
+}
+message ConfigRes {
+    
+}
 message HistoryReq {
     
 }
