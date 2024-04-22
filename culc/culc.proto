@@ -64,15 +64,15 @@ message HistoryReq {
     
 }
 
-// Определение сообщения для ответа с историей выражений
+
 message HistoryRes {
-    repeated Expression expressions = 1; // Список выражений
+    repeated Expression expressions = 1; 
 }
 
-// Определение сообщения для выражения
+
 message Expression {
-    int32 id = 1; // Идентификатор выражения
-    string expres = 2;  // Идентификатор пользователя
+    int32 id = 1; 
+    string expres = 2;  
 
 }
 message StreamServerStatusesRequest {
@@ -90,7 +90,7 @@ message CalculateReq {
     string expression = 1;
 }
 message ClientReq {
-    int32 countworker = 1;
+    int64 countworker = 1;
 
 }
 message ClientRes {

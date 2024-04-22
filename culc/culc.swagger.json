@@ -220,7 +220,7 @@
       "properties": {
         "countworker": {
           "type": "integer",
-          "format": "int32"
+          "format": "int64"
         }
       }
     },
@@ -312,7 +312,7 @@
         },
         "all": {
           "type": "integer",
-          "format": "int32"
+          "format": "int64"
         }
       }
     },
@@ -342,7 +342,7 @@
       "properties": {
         "code": {
           "type": "integer",
-          "format": "int32"
+          "format": "int64"
         },
         "message": {
           "type": "string"

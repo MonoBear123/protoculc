@@ -176,13 +176,12 @@ func (*HistoryReq) Descriptor() ([]byte, []int) {
 	return file_culc_proto_rawDescGZIP(), []int{2}
 }
 
-// Определение сообщения для ответа с историей выражений
 type HistoryRes struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Expressions []*Expression `protobuf:"bytes,1,rep,name=expressions,proto3" json:"expressions,omitempty"` // Список выражений
+	Expressions []*Expression `protobuf:"bytes,1,rep,name=expressions,proto3" json:"expressions,omitempty"`
 }
 
 func (x *HistoryRes) Reset() {
@@ -224,14 +223,13 @@ func (x *HistoryRes) GetExpressions() []*Expression {
 	return nil
 }
 
-// Определение сообщения для выражения
 type Expression struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id     int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`        // Идентификатор выражения
-	Expres string `protobuf:"bytes,2,opt,name=expres,proto3" json:"expres,omitempty"` // Идентификатор пользователя
+	Id     int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Expres string `protobuf:"bytes,2,opt,name=expres,proto3" json:"expres,omitempty"`
 }
 
 func (x *Expression) Reset() {
@@ -480,7 +478,7 @@ type ClientReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Countworker int32 `protobuf:"varint,1,opt,name=countworker,proto3" json:"countworker,omitempty"`
+	Countworker int64 `protobuf:"varint,1,opt,name=countworker,proto3" json:"countworker,omitempty"`
 }
 
 func (x *ClientReq) Reset() {
@@ -515,7 +513,7 @@ func (*ClientReq) Descriptor() ([]byte, []int) {
 	return file_culc_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *ClientReq) GetCountworker() int32 {
+func (x *ClientReq) GetCountworker() int64 {
 	if x != nil {
 		return x.Countworker
 	}
@@ -860,7 +858,7 @@ var file_culc_proto_rawDesc = []byte{
 	0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x72, 0x65, 0x73,
 	0x73, 0x69, 0x6f, 0x6e, 0x22, 0x2d, 0x0a, 0x09, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52, 0x65,
 	0x71, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x77, 0x6f, 0x72,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x77, 0x6f, 0x72,
 	0x6b, 0x65, 0x72, 0x22, 0x1d, 0x0a, 0x09, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73,
 	0x12, 0x10, 0x0a, 0x03, 0x72, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x72,
 	0x65, 0x73, 0x22, 0x26, 0x0a, 0x0c, 0x43, 0x61, 0x6c, 0x63, 0x75, 0x6c, 0x61, 0x74, 0x65, 0x52,
